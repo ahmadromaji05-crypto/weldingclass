@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulator Pengelasan 2G, 3G, 4G, 5G & Sertifikasi Kualifikasi Welder</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        industrial: {
+                            950: '#070a0f',
+                            900: '#0c111c',
+                            800: '#151d2a',
+                            700: '#212d40',
+                            600: '#31425c',
+                            accent: '#ff9d00',
+                            glow: '#00d2ff',
+                            success: '#10b981',
+                            danger: '#ef4444'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Pinyon+Script&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #070a0f;
+            color: #f1f5f9;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .font-serif-cert { font-family: 'Cinzel', serif; }
+        .font-script-cert { font-family: 'Pinyon Script', cursive; }
+        .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0c111c; }
+        ::-webkit-scrollbar-thumb { background: #212d40; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff9d00; }
+
+        canvas { touch-action: none; }
+
+        @keyframes arcPulse {
+            0%, 100% { opacity: 0.85; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.08); }
+        }
+
+        .arc-pulse { animation: arcPulse 1.2s infinite ease-in-out; }
+
+        @keyframes sparkGlow {
+            0% { box-shadow: 0 0 5px #ff9d00, 0 0 10px #ff9d00; }
+            50% { box-shadow: 0 0 15px #00d2ff, 0 0 25px #00d2ff; }
+            100% { box-shadow: 0 0 5px #ff9d00, 0 0 10px #ff9d00; }
+        }
+
+        .glow-border { animation: sparkGlow 3s infinite alternate; }
+
+        /* Printing adjustments */
+        @media print {
+            body * { visibility: hidden; }
+            #cert-modal, #cert-modal * { visibility: visible; }
+            #cert-modal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white; }
+            #cert-preview-img { max-width: 100% !important; height: auto !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between bg-industrial-950 text-slate-100 antialiased">
+
+    <header class="bg-industrial-900 border-b border-industrial-700/80 px-4 py-3 shadow-xl sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-red-600 flex items-center justify-center text-slate-950 font-black text-2xl shadow-lg shadow-orange-500/20 border border-amber-400/30">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-lg md:text-xl tracking-wider text-white flex items-center gap-2">
+                        WELD-SIM PRO <span class="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-mono font-bold tracking-normal">ASME SEC IX / AWS D1.1</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Platform Simulasi Pengelasan Industri & Uji Kualifikasi Welder Resmi</p>
+                </div>
+            </div>
+
+            <!-- Position Selector Badges -->
+            <div class="flex flex-wrap items-center justify-center gap-1.5 bg-industrial-950 p-1.5 rounded-xl border border-industrial-700/80">
+                <span class="text-xs font-bold text-slate-400 px-2 hidden sm:inline"><i class="fa-solid fa-layer-group text-amber-500 mr-1"></i>Posisi:</span>
+                <button id="pos-badge-2g" class="pos-badge px-3 py-1.5 text-xs font-extrabold rounded-lg transition bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md" onclick="selectPosition('2G')">2G Horizontal</button>
+                <button id="pos-badge-3g" class="pos-badge px-3 py-1.5 text-xs font-extrabold rounded-lg transition text-slate-400 hover:text-white hover:bg-industrial-700" onclick="selectPosition('3G')">3G Vertical Up</button>
+                <button id="pos-badge-4g" class="pos-badge px-3 py-1.5 text-xs font-extrabold rounded-lg transition text-slate-400 hover:text-white hover:bg-industrial-700" onclick="selectPosition('4G')">4G Overhead</button>
+                <button id="pos-badge-5g" class="pos-badge px-3 py-1.5 text-xs font-extrabold rounded-lg transition text-slate-400 hover:text-white hover:bg-industrial-700" onclick="selectPosition('5G')">5G Pipe 360°</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto">
+
+        <!-- Sidebar Control Panel (4 Columns) -->
+        <div class="lg:col-span-4 flex flex-col gap-4">
+            
+            <!-- Card Profil Welder -->
+            <div class="bg-industrial-900 border border-industrial-700 rounded-2xl p-4 shadow-lg">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-user-gear text-sm"></i> Data Peserta Uji Kualifikasi
+                </h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 font-medium">Nama Lengkap Welder</label>
+                        <input type="text" id="input-welder-name" value="Budi Santoso" class="w-full bg-industrial-950 border border-industrial-600 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition font-semibold" placeholder="Masukkan nama welder...">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1 font-medium">Instansi / Perusahaan</label>
+                        <input type="text" id="input-company-name" value="PT Teknik Las Nusantara" class="w-full bg-industrial-950 border border-industrial-600 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition font-semibold" placeholder="Masukkan nama instansi...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Parameter Pengelasan -->
+            <div class="bg-industrial-900 border border-industrial-700 rounded-2xl p-4 shadow-lg flex-1 flex flex-col justify-between gap-4">
+                <div>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-sm"></i> Spesifikasi & Parameter Posisi
+                    </h2>
+
+                    <!-- Deskripsi Posisi Aktif -->
+                    <div id="pos-description-box" class="bg-industrial-950 border border-industrial-700 rounded-xl p-3 mb-4 text-xs text-slate-300 leading-relaxed shadow-inner">
+                        <!-- Updated via JavaScript -->
+                    </div>
+
+                    <!-- Slider Amperage -->
+                    <div class="mb-4 bg-industrial-950/80 p-3.5 rounded-xl border border-industrial-700">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-bolt text-amber-400"></i> Kuat Arus (Amperage):
+                            </label>
+                            <span id="amp-display" class="font-mono-code text-base font-extrabold text-amber-400">120 A</span>
+                        </div>
+                        <input type="range" id="amp-slider" min="80" max="180" value="120" class="w-full h-2 bg-industrial-800 rounded-lg appearance-none cursor-pointer accent-amber-500 my-2">
+                        <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+                            <span>80A (Dingin)</span>
+                            <span id="target-amp-hint" class="text-emerald-400 font-bold">Target: 110-135A</span>
+                            <span>180A (Panas)</span>
+                        </div>
+                    </div>
+
+                    <!-- Audio Toggle -->
+                    <div class="flex items-center justify-between bg-industrial-950/80 p-3 rounded-xl border border-industrial-700">
+                        <span class="text-xs text-slate-300 font-semibold flex items-center gap-2">
+                            <i class="fa-solid fa-volume-high text-amber-400"></i> Suara Busur Las (Arc Sizzle)
+                        </span>
+                        <button id="audio-toggle-btn" class="text-xs bg-industrial-700 text-slate-200 px-3 py-1.5 rounded-lg font-bold hover:bg-amber-500 hover:text-slate-950 transition">
+                            Matikan Audio
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Qualification Status & Certificate Action Panel -->
+                <div class="flex flex-col gap-3 pt-3 border-t border-industrial-700/80">
+                    
+                    <!-- Qualification Status Card -->
+                    <div id="qual-status-card" class="bg-industrial-950 border border-slate-700/60 rounded-xl p-3 flex items-center justify-between transition-all">
+                        <div class="flex items-center gap-2.5">
+                            <div id="qual-icon" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] uppercase font-bold text-slate-400">Status Kelulusan</span>
+                                <span id="qual-text" class="text-xs font-bold text-slate-300">BELUM DIUJI</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-[10px] text-slate-400">Batas Kelulusan</span>
+                            <span class="text-xs font-bold text-amber-400 font-mono">≥ 80 Poin & 85%</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button id="btn-reset" class="w-1/3 bg-industrial-700 hover:bg-industrial-600 text-slate-200 py-3 rounded-xl text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 shadow">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </button>
+
+                        <button id="btn-evaluate" class="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 rounded-xl text-xs font-black uppercase transition flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20">
+                            <i class="fa-solid fa-calculator"></i> Evaluasi Hasil
+                        </button>
+                    </div>
+                    
+                    <!-- Locked/Unlocked Certificate Button -->
+                    <button id="btn-claim-cert" disabled class="w-full bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed py-3.5 rounded-xl text-xs font-black uppercase transition flex flex-col items-center justify-center gap-0.5 shadow-lg opacity-75">
+                        <span class="flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-lock text-amber-500" id="cert-btn-icon"></i> <span id="cert-btn-title">Sertifikat Terkunci</span>
+                        </span>
+                        <span id="cert-btn-sub" class="text-[10px] font-normal normal-case opacity-80">Capai Skor Minimal 80 & Cakupan 85% untuk Mengunduh</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Display Workbench Area (8 Columns) -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
+            
+            <!-- Canvas Container -->
+            <div class="relative bg-industrial-900 border border-industrial-700 rounded-2xl p-3.5 shadow-2xl flex flex-col items-center">
+                
+                <!-- HUD Overlay Top -->
+                <div class="w-full flex flex-wrap justify-between items-center bg-industrial-950/90 px-4 py-2.5 rounded-xl border border-industrial-700/80 mb-3 text-xs gap-2 shadow-inner">
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <span class="text-slate-400 font-medium">Kecepatan:</span>
+                            <span id="hud-speed" class="font-mono-code text-white font-bold ml-1">0.0</span> <span class="text-[10px] text-slate-500">px/f</span>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 font-medium">Cakupan Jalur:</span>
+                            <span id="hud-coverage" class="font-mono-code text-amber-400 font-bold ml-1">0%</span>
+                        </div>
+                        <div class="hidden sm:block">
+                            <span class="text-slate-400 font-medium">Penetrasi:</span>
+                            <span id="hud-penetration" class="font-mono-code text-emerald-400 font-bold ml-1">100%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-400 text-[11px] font-medium">Status Busur:</span>
+                        <div id="hud-status-badge" class="px-3 py-1 rounded-lg text-[11px] font-extrabold bg-industrial-700 text-slate-300">
+                            READY
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Canvas -->
+                <div class="relative w-full aspect-[16/10] max-h-[480px] bg-slate-950 rounded-xl overflow-hidden border border-industrial-700/90 cursor-crosshair shadow-2xl">
+                    <canvas id="weld-canvas" class="w-full h-full block"></canvas>
+                    
+                    <!-- Guide Overlay Instruction -->
+                    <div id="canvas-overlay-hint" class="absolute inset-0 bg-slate-950/75 backdrop-blur-[2px] flex flex-col items-center justify-center text-center p-6 transition-opacity duration-300 pointer-events-none z-10">
+                        <div class="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/50 text-amber-400 flex items-center justify-center text-2xl mb-3 arc-pulse shadow-lg shadow-amber-500/20">
+                            <i class="fa-solid fa-hand-pointer"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-1">Klik / Sentuh & Tahan Pada Alur Sambungan</h3>
+                        <p class="text-xs text-slate-300 max-w-md leading-relaxed">Tarik torch secara teratur sepanjang alur. Jaga kuat arus, posisi alur, dan kecepatan pengelasan sesuai rekomendasi untuk hasil lulus kualifikasi.</p>
+                        <span id="hint-position-note" class="mt-3 text-[11px] bg-amber-500/10 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30 font-mono">
+                            Mode 2G: Ikuti Garis Horisontal Tengah
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Telemetry Metrics Footer Cards -->
+                <div class="w-full grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                    <div class="bg-industrial-950 p-3 rounded-xl border border-industrial-700/80 text-center shadow-inner">
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-bold">Akurasi Jalur</span>
+                        <span id="metric-path" class="text-sm font-extrabold font-mono-code text-emerald-400">100%</span>
+                    </div>
+                    <div class="bg-industrial-950 p-3 rounded-xl border border-industrial-700/80 text-center shadow-inner">
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-bold">Kontrol Panas</span>
+                        <span id="metric-heat" class="text-sm font-extrabold font-mono-code text-emerald-400">Optimal</span>
+                    </div>
+                    <div class="bg-industrial-950 p-3 rounded-xl border border-industrial-700/80 text-center shadow-inner">
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-bold">Total Defect</span>
+                        <span id="metric-defects" class="text-sm font-extrabold font-mono-code text-amber-400">0</span>
+                    </div>
+                    <div class="bg-industrial-950 p-3 rounded-xl border border-industrial-700/80 text-center shadow-inner">
+                        <span class="block text-[10px] text-slate-400 uppercase tracking-wider font-bold">Estimasi Skor</span>
+                        <span id="metric-score" class="text-sm font-extrabold font-mono-code text-orange-400">0 / 100</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal Sertifikat Kualifikasi Welder -->
+    <div id="cert-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-industrial-900 border border-industrial-700 rounded-2xl max-w-4xl w-full p-5 sm:p-6 shadow-2xl flex flex-col gap-5 my-auto">
+            
+            <div class="flex justify-between items-center border-b border-industrial-700/80 pb-3.5 no-print">
+                <div>
+                    <h3 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-award text-xl"></i> Sertifikat Kualifikasi Welder Resmi
+                    </h3>
+                    <p class="text-xs text-slate-400">Sertifikat terverifikasi berdasarkan standar evaluasi NDT & visual pengelasan ASME IX / AWS D1.1.</p>
+                </div>
+                <button onclick="closeCertModal()" class="w-9 h-9 rounded-xl bg-industrial-800 hover:bg-industrial-700 text-slate-300 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Certificate Canvas Preview Display Container -->
+            <div class="w-full bg-slate-950 rounded-xl p-2 border border-industrial-700/80 overflow-hidden flex justify-center shadow-inner relative min-h-[260px] items-center">
+                <!-- Hidden Render Canvas -->
+                <canvas id="cert-canvas" width="1200" height="850" class="hidden"></canvas>
+                <!-- Rendered Image Output -->
+                <img id="cert-preview-img" alt="Pratinjau Sertifikat" class="max-w-full h-auto rounded shadow-2xl border border-amber-500/30 object-contain max-h-[62vh]">
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 border-t border-industrial-700/80 pt-4 no-print">
+                <div class="text-xs text-slate-400 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-emerald-400 text-sm"></i> ASME Sec IX & AWS D1.1 Compliant Format
+                </div>
+                <div class="flex flex-wrap gap-2.5 w-full sm:w-auto">
+                    <button onclick="closeCertModal()" class="flex-1 sm:flex-none px-4 py-2.5 bg-industrial-800 hover:bg-industrial-700 text-slate-200 rounded-xl text-xs font-bold uppercase transition">
+                        Tutup
+                    </button>
+                    <button onclick="printCertificate()" class="flex-1 sm:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold uppercase transition flex items-center justify-center gap-2 shadow">
+                        <i class="fa-solid fa-print"></i> Cetak / PDF
+                    </button>
+                    <button onclick="downloadCertificatePNG()" class="flex-1 sm:flex-none px-6 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 rounded-xl text-xs font-black uppercase transition flex items-center justify-center gap-2 shadow-lg shadow-orange-500/20">
+                        <i class="fa-solid fa-download"></i> Unduh Gambar (PNG)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Status -->
+    <footer class="bg-industrial-900 border-t border-industrial-700/80 py-3 px-4 text-center text-xs text-slate-500 no-print">
+        Simulasi Pengelasan Industri &copy; 2026 • Modul Uji Standar ASME Section IX & AWS D1.1
+    </footer>
+
+    <script>
+        // Configuration for Positions
+        const POSITIONS_CONFIG = {
+            '2G': {
+                name: '2G (Horizontal Butt Weld)',
+                desc: 'Pengelasan sambungan tumpul posisi mendatar pada pelat vertikal. Gravitasi menarik lelehan ke bawah. Memerlukan kecepatan konstan dan penumpukan bead teratur.',
+                hintNote: 'Mode 2G: Ikuti Garis Horisontal Tengah',
+                targetAmpMin: 110,
+                targetAmpMax: 135,
+                targetSpeedMin: 1.8,
+                targetSpeedMax: 4.5,
+                requiresWeaving: false
+            },
+            '3G': {
+                name: '3G (Vertical Up Weld with Weaving)',
+                desc: 'Pengelasan tegak vertikal dari bawah ke atas. Memerlukan ayunan (weaving pattern Z/Zig-zag) untuk menahan cairan logam tidak menetes ke bawah.',
+                hintNote: 'Mode 3G: Ikuti Garis Vertikal & Ayunkan Torch (Weaving)',
+                targetAmpMin: 100,
+                targetAmpMax: 125,
+                targetSpeedMin: 1.2,
+                targetSpeedMax: 3.8,
+                requiresWeaving: true
+            },
+            '4G': {
+                name: '4G (Overhead Weld)',
+                desc: 'Pengelasan di atas kepala (Overhead). Gaya gravitasi sangat kuat menarik percikan dan lelehan logam ke bawah. Memerlukan jarak busur pendek & arus sedang.',
+                hintNote: 'Mode 4G: Ikuti Garis Horisontal Atas Kepala',
+                targetAmpMin: 95,
+                targetAmpMax: 120,
+                targetSpeedMin: 2.0,
+                targetSpeedMax: 4.8,
+                requiresWeaving: false
+            },
+            '5G': {
+                name: '5G (Fixed Pipe Weld 360°)',
+                desc: 'Pengelasan pipa posisi mendatar tetap (tidak diputar). Mencakup gabungan posisi overhead (bawah), vertikal (samping), dan flat (atas) secara berurutan 360°.',
+                hintNote: 'Mode 5G: Ikuti Alur Melingkar Pipa 360° secara Lengkap',
+                targetAmpMin: 105,
+                targetAmpMax: 130,
+                targetSpeedMin: 1.6,
+                targetSpeedMax: 4.2,
+                requiresWeaving: true
+            }
+        };
+
+        // App States
+        let currentPosKey = '2G';
+        let currentAmp = 120;
+        let isWelding = false;
+        let soundEnabled = true;
+
+        // Telemetry & Test Data
+        let torchX = 0, torchY = 0;
+        let lastX = 0, lastY = 0;
+        let currentSpeed = 0;
+        let seamPoints = [];
+        let sparkParticles = [];
+        let defectsCount = { burnThrough: 0, lackOfFusion: 0, sagging: 0, offTrack: 0 };
+        let uniqueCoverageGrid = new Set();
+        let totalGridCount = 100;
+        let currentEvaluationScore = 0;
+        let isQualified = false;
+
+        // Canvas & Context References
+        const canvas = document.getElementById('weld-canvas');
+        const ctx = canvas.getContext('2d');
+        const certCanvas = document.getElementById('cert-canvas');
+        const certCtx = certCanvas.getContext('2d');
+
+        // Web Audio Synthesizer
+        let audioCtx = null;
+        let noiseNode = null;
+        let filterNode = null;
+        let gainNode = null;
+
+        function initAudioEngine() {
+            if (audioCtx) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const bufferSize = audioCtx.sampleRate * 2;
+                const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+
+                noiseNode = audioCtx.createBufferSource();
+                noiseNode.buffer = noiseBuffer;
+                noiseNode.loop = true;
+
+                filterNode = audioCtx.createBiquadFilter();
+                filterNode.type = 'bandpass';
+                filterNode.frequency.value = 1400;
+                filterNode.Q.value = 1.5;
+
+                gainNode = audioCtx.createGain();
+                gainNode.gain.value = 0;
+
+                noiseNode.connect(filterNode);
+                filterNode.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                noiseNode.start();
+            } catch(e) {
+                console.log("Audio API Error:", e);
+            }
+        }
+
+        function setAudioWeldingState(active) {
+            if (!audioCtx || !soundEnabled) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const now = audioCtx.currentTime;
+            if (active) {
+                gainNode.gain.setTargetAtTime(0.25, now, 0.02);
+                filterNode.frequency.setTargetAtTime(1100 + Math.random() * 800, now, 0.01);
+            } else {
+                gainNode.gain.setTargetAtTime(0, now, 0.04);
+            }
+        }
+
+        // Select Position
+        function selectPosition(posKey) {
+            currentPosKey = posKey;
+            
+            // Update Badges UI
+            document.querySelectorAll('.pos-badge').forEach(el => {
+                el.className = "pos-badge px-3 py-1.5 text-xs font-extrabold rounded-lg transition text-slate-400 hover:text-white hover:bg-industrial-700";
+            });
+            const activeBadge = document.getElementById(`pos-badge-${posKey.toLowerCase()}`);
+            if (activeBadge) {
+                activeBadge.className = "pos-badge px-3 py-1.5 text-xs font-extrabold rounded-lg transition bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md";
+            }
+
+            // Update Config Info
+            const config = POSITIONS_CONFIG[posKey];
+            document.getElementById('pos-description-box').innerHTML = `
+                <strong class="text-amber-400 block mb-1 text-xs font-bold">${config.name}</strong>
+                <p class="text-slate-300 mb-2 text-[11px] leading-relaxed">${config.desc}</p>
+                <span class="inline-block bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-md border border-amber-500/30 font-mono-code text-[10px] font-bold">
+                    Target Arus: ${config.targetAmpMin}A - ${config.targetAmpMax}A
+                </span>
+            `;
+
+            document.getElementById('target-amp-hint').textContent = `Target: ${config.targetAmpMin}-${config.targetAmpMax}A`;
+            document.getElementById('hint-position-note').textContent = config.hintNote;
+
+            resetTest();
+        }
+
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            selectPosition('2G');
+
+            // Amperage Slider Listener
+            const ampSlider = document.getElementById('amp-slider');
+            ampSlider.addEventListener('input', (e) => {
+                currentAmp = parseInt(e.target.value);
+                document.getElementById('amp-display').textContent = `${currentAmp} A`;
+            });
+
+            // Audio Toggle Listener
+            const audioBtn = document.getElementById('audio-toggle-btn');
+            audioBtn.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                audioBtn.textContent = soundEnabled ? 'Matikan Audio' : 'Aktifkan Audio';
+                audioBtn.className = soundEnabled ? 
+                    'text-xs bg-industrial-700 text-slate-200 px-3 py-1.5 rounded-lg font-bold hover:bg-amber-500 hover:text-slate-950 transition' :
+                    'text-xs bg-red-500/20 text-red-400 border border-red-500/40 px-3 py-1.5 rounded-lg font-bold hover:bg-red-500 hover:text-white transition';
+            });
+
+            // Action Buttons
+            document.getElementById('btn-reset').addEventListener('click', resetTest);
+            document.getElementById('btn-evaluate').addEventListener('click', calculateEvaluation);
+            document.getElementById('btn-claim-cert').addEventListener('click', openCertificateModal);
+
+            // Canvas Interaction Handlers
+            canvas.addEventListener('mousedown', startWelding);
+            canvas.addEventListener('mousemove', moveWelding);
+            window.addEventListener('mouseup', stopWelding);
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                startWelding(e.touches[0]);
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                moveWelding(e.touches[0]);
+            });
+            window.addEventListener('touchend', stopWelding);
+
+            window.addEventListener('resize', resizeCanvas);
+
+            // Main Animation Loop
+            requestAnimationFrame(gameLoop);
+        });
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        function resetTest() {
+            seamPoints = [];
+            sparkParticles = [];
+            uniqueCoverageGrid.clear();
+            defectsCount = { burnThrough: 0, lackOfFusion: 0, sagging: 0, offTrack: 0 };
+            isWelding = false;
+            currentEvaluationScore = 0;
+            isQualified = false;
+            setAudioWeldingState(false);
+            
+            document.getElementById('canvas-overlay-hint').style.opacity = '1';
+            document.getElementById('hud-status-badge').textContent = 'READY';
+            document.getElementById('hud-status-badge').className = 'px-3 py-1 rounded-lg text-[11px] font-extrabold bg-industrial-700 text-slate-300';
+            
+            // Reset Qualification UI Card
+            const qualCard = document.getElementById('qual-status-card');
+            qualCard.className = "bg-industrial-950 border border-slate-700/60 rounded-xl p-3 flex items-center justify-between transition-all";
+            document.getElementById('qual-icon').innerHTML = '<i class="fa-solid fa-lock"></i>';
+            document.getElementById('qual-icon').className = 'w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center font-bold text-sm';
+            document.getElementById('qual-text').textContent = 'BELUM DIUJI';
+            document.getElementById('qual-text').className = 'text-xs font-bold text-slate-300';
+
+            // Lock Certificate Button
+            const claimBtn = document.getElementById('btn-claim-cert');
+            claimBtn.disabled = true;
+            claimBtn.className = "w-full bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed py-3.5 rounded-xl text-xs font-black uppercase transition flex flex-col items-center justify-center gap-0.5 shadow-lg opacity-75";
+            document.getElementById('cert-btn-icon').className = "fa-solid fa-lock text-amber-500";
+            document.getElementById('cert-btn-title').textContent = "Sertifikat Terkunci";
+            document.getElementById('cert-btn-sub').textContent = "Capai Skor Minimal 80 & Cakupan 85% untuk Mengunduh";
+
+            updateMetricsHUD();
+        }
+
+        function startWelding(e) {
+            initAudioEngine();
+            isWelding = true;
+            document.getElementById('canvas-overlay-hint').style.opacity = '0';
+            document.getElementById('hud-status-badge').textContent = 'WELDING';
+            document.getElementById('hud-status-badge').className = 'px-3 py-1 rounded-lg text-[11px] font-extrabold bg-amber-500 text-slate-950 arc-pulse shadow-md shadow-amber-500/30';
+
+            const rect = canvas.getBoundingClientRect();
+            torchX = e.clientX - rect.left;
+            torchY = e.clientY - rect.top;
+            lastX = torchX;
+            lastY = torchY;
+
+            setAudioWeldingState(true);
+        }
+
+        function moveWelding(e) {
+            if (!isWelding) return;
+
+            const rect = canvas.getBoundingClientRect();
+            torchX = e.clientX - rect.left;
+            torchY = e.clientY - rect.top;
+
+            const dx = torchX - lastX;
+            const dy = torchY - lastY;
+            currentSpeed = Math.sqrt(dx * dx + dy * dy);
+
+            processWeldPhysics(dx, dy);
+
+            lastX = torchX;
+            lastY = torchY;
+        }
+
+        function stopWelding() {
+            if (!isWelding) return;
+            isWelding = false;
+            currentSpeed = 0;
+            setAudioWeldingState(false);
+            document.getElementById('hud-status-badge').textContent = 'STOPPED';
+            document.getElementById('hud-status-badge').className = 'px-3 py-1 rounded-lg text-[11px] font-extrabold bg-emerald-500 text-slate-950';
+        }
+
+        function processWeldPhysics(dx, dy) {
+            const config = POSITIONS_CONFIG[currentPosKey];
+            const w = canvas.width;
+            const h = canvas.height;
+
+            let quality = "good";
+            let beadRadius = Math.max(7, Math.min(20, currentAmp / 9.5));
+            let sagOffsetY = 0;
+            let targetDist = 0;
+
+            // Calculate Distance from Target Groove
+            if (currentPosKey === '2G' || currentPosKey === '4G') {
+                targetDist = Math.abs(torchY - (h / 2));
+                // Grid cell index tracking
+                let cellIndex = Math.floor((torchX / w) * 100);
+                if (cellIndex >= 0 && cellIndex < 100) uniqueCoverageGrid.add(cellIndex);
+
+            } else if (currentPosKey === '3G') {
+                targetDist = Math.abs(torchX - (w / 2));
+                let cellIndex = Math.floor((torchY / h) * 100);
+                if (cellIndex >= 0 && cellIndex < 100) uniqueCoverageGrid.add(cellIndex);
+
+            } else if (currentPosKey === '5G') {
+                const cx = w / 2;
+                const cy = h / 2;
+                const r = Math.min(w, h) * 0.35;
+                const distFromCenter = Math.sqrt((torchX - cx) ** 2 + (torchY - cy) ** 2);
+                targetDist = Math.abs(distFromCenter - r);
+
+                // Angular Coverage Angle (0-360)
+                let angle = Math.atan2(torchY - cy, torchX - cx) * (180 / Math.PI);
+                if (angle < 0) angle += 360;
+                let sector = Math.floor((angle / 360) * 100);
+                if (sector >= 0 && sector < 100) uniqueCoverageGrid.add(sector);
+            }
+
+            // Detect Defect Conditions
+            if (targetDist > 28) {
+                quality = "off_track";
+                defectsCount.offTrack++;
+            } else if (currentAmp > config.targetAmpMax + 20 || (currentSpeed < 0.5 && isWelding)) {
+                quality = "burn_through";
+                defectsCount.burnThrough++;
+            } else if (currentAmp < config.targetAmpMin - 15 || currentSpeed > config.targetSpeedMax + 3.8) {
+                quality = "lack_of_fusion";
+                defectsCount.lackOfFusion++;
+            } else {
+                if (currentPosKey === '4G' || (currentPosKey === '2G' && currentAmp > 128)) {
+                    sagOffsetY = Math.random() * (currentAmp / 22);
+                    if (sagOffsetY > 3.8) defectsCount.sagging++;
+                }
+            }
+
+            // Record Seam Bead Point
+            seamPoints.push({
+                x: torchX,
+                y: torchY + sagOffsetY,
+                radius: beadRadius,
+                quality: quality,
+                timestamp: Date.now()
+            });
+
+            // Spark Particles Generation
+            const sparkCount = currentPosKey === '4G' ? 8 : 4;
+            for (let i = 0; i < sparkCount; i++) {
+                let vx = (Math.random() - 0.5) * 9;
+                let vy = (Math.random() - 0.5) * 9;
+                if (currentPosKey === '4G') vy += Math.random() * 6; // Gravity drag overhead
+                
+                sparkParticles.push({
+                    x: torchX,
+                    y: torchY,
+                    vx: vx,
+                    vy: vy,
+                    life: 12 + Math.random() * 12,
+                    color: Math.random() > 0.25 ? '#ffffff' : '#ff9d00'
+                });
+            }
+
+            updateMetricsHUD();
+        }
+
+        function updateMetricsHUD() {
+            document.getElementById('hud-speed').textContent = currentSpeed.toFixed(1);
+
+            const config = POSITIONS_CONFIG[currentPosKey];
+            let coveragePercent = Math.min(100, Math.floor((uniqueCoverageGrid.size / 100) * 100));
+            document.getElementById('hud-coverage').textContent = `${coveragePercent}%`;
+
+            let heatStatus = "Optimal";
+            if (currentAmp > config.targetAmpMax) heatStatus = "Terlalu Panas";
+            else if (currentAmp < config.targetAmpMin) heatStatus = "Terlalu Dingin";
+
+            const totalDefects = defectsCount.burnThrough + defectsCount.lackOfFusion + defectsCount.sagging + defectsCount.offTrack;
+            document.getElementById('metric-defects').textContent = totalDefects;
+            document.getElementById('metric-heat').textContent = heatStatus;
+
+            let pathAccuracy = Math.max(0, 100 - (defectsCount.offTrack * 0.8));
+            document.getElementById('metric-path').textContent = `${Math.floor(pathAccuracy)}%`;
+
+            // Live score estimation
+            let estScore = Math.max(0, Math.min(100, Math.floor((coveragePercent * 0.6) + (pathAccuracy * 0.4) - (totalDefects * 0.8))));
+            document.getElementById('metric-score').textContent = `${estScore} / 100`;
+        }
+
+        // Calculate Final Qualification & Enable/Disable Cert
+        function calculateEvaluation() {
+            const coverage = Math.min(100, Math.floor((uniqueCoverageGrid.size / 100) * 100));
+            const totalDefects = defectsCount.burnThrough + defectsCount.lackOfFusion + defectsCount.sagging + defectsCount.offTrack;
+            let pathAccuracy = Math.max(0, 100 - (defectsCount.offTrack * 0.8));
+
+            let finalScore = Math.max(0, Math.min(100, Math.floor((coverage * 0.5) + (pathAccuracy * 0.5) - (totalDefects * 0.9))));
+            currentEvaluationScore = finalScore;
+
+            const qualCard = document.getElementById('qual-status-card');
+            const qualIcon = document.getElementById('qual-icon');
+            const qualText = document.getElementById('qual-text');
+            const claimBtn = document.getElementById('btn-claim-cert');
+
+            // STRICT Kelulusan Rules: Score >= 80 AND Coverage >= 85%
+            if (finalScore >= 80 && coverage >= 85) {
+                isQualified = true;
+                
+                // Passed UI
+                qualCard.className = "bg-emerald-950/80 border border-emerald-500/60 rounded-xl p-3 flex items-center justify-between transition-all shadow-lg shadow-emerald-500/10";
+                qualIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                qualIcon.className = 'w-8 h-8 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-base shadow';
+                qualText.textContent = `LULUS / QUALIFIED (${finalScore} Poin)`;
+                qualText.className = 'text-xs font-black text-emerald-400';
+
+                // Unlock Claim Button
+                claimBtn.disabled = false;
+                claimBtn.className = "w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 py-3.5 rounded-xl text-xs font-black uppercase transition flex flex-col items-center justify-center gap-0.5 shadow-xl shadow-orange-500/20 cursor-pointer border border-amber-300";
+                document.getElementById('cert-btn-icon').className = "fa-solid fa-award text-slate-950 text-base";
+                document.getElementById('cert-btn-title').textContent = "KLAIM & UNDUH SERTIFIKAT QUALIFIED";
+                document.getElementById('cert-btn-sub').textContent = "Selamat! Anda Memenuhi Syarat Kualifikasi Standar ASME IX / AWS D1.1";
+
+                showNotification("SELAMAT! Anda Dinyatakan LULUS & QUALIFIED. Sertifikat resmi telah terbuka!", "success");
+
+            } else {
+                isQualified = false;
+
+                // Failed UI
+                qualCard.className = "bg-red-950/80 border border-red-500/60 rounded-xl p-3 flex items-center justify-between transition-all shadow-lg shadow-red-500/10";
+                qualIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                qualIcon.className = 'w-8 h-8 rounded-lg bg-red-500 text-white flex items-center justify-center font-bold text-base shadow';
+                qualText.textContent = `BELUM LULUS (${finalScore} Poin)`;
+                qualText.className = 'text-xs font-extrabold text-red-400';
+
+                // Keep Locked
+                claimBtn.disabled = true;
+                claimBtn.className = "w-full bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed py-3.5 rounded-xl text-xs font-black uppercase transition flex flex-col items-center justify-center gap-0.5 shadow-lg opacity-75";
+                document.getElementById('cert-btn-icon').className = "fa-solid fa-lock text-amber-500";
+                document.getElementById('cert-btn-title').textContent = "Sertifikat Terkunci (Belum Lulus)";
+                document.getElementById('cert-btn-sub').textContent = `Syarat Lulus: Skor Minimal 80 & Cakupan 85% (Skor Anda: ${finalScore}, Cakupan: ${coverage}%)`;
+
+                showNotification(`BELUM LULUS! Skor: ${finalScore}/100, Cakupan: ${coverage}%. Ulangi pengelasan hingga memenuhi standar minimal.`, "error");
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawJointGrooveBackground();
+            drawWeldSeam();
+            drawSparks();
+
+            if (isWelding) {
+                drawTorchAndArc();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function drawJointGrooveBackground() {
+            const w = canvas.width;
+            const h = canvas.height;
+
+            if (currentPosKey === '2G' || currentPosKey === '4G') {
+                // Horizontal Plate Groove
+                ctx.fillStyle = '#17202e';
+                ctx.fillRect(0, 0, w, h / 2 - 6);
+                ctx.fillRect(0, h / 2 + 6, w, h / 2 - 6);
+
+                // Dark Groove gap
+                ctx.fillStyle = '#080b12';
+                ctx.fillRect(0, h / 2 - 6, w, 12);
+
+                // Dashed Center Guide Line
+                ctx.strokeStyle = 'rgba(255, 157, 0, 0.45)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([8, 8]);
+                ctx.beginPath();
+                ctx.moveTo(0, h / 2);
+                ctx.lineTo(w, h / 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+            } else if (currentPosKey === '3G') {
+                // Vertical Plate Groove
+                ctx.fillStyle = '#17202e';
+                ctx.fillRect(0, 0, w / 2 - 6, h);
+                ctx.fillRect(w / 2 + 6, 0, w / 2 - 6, h);
+
+                ctx.fillStyle = '#080b12';
+                ctx.fillRect(w / 2 - 6, 0, 12, h);
+
+                // Sinusoidal Weaving Guide Pattern
+                ctx.strokeStyle = 'rgba(0, 210, 255, 0.35)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                for (let y = 0; y < h; y += 4) {
+                    let weaveX = (w / 2) + Math.sin(y / 12) * 14;
+                    if (y === 0) ctx.moveTo(weaveX, y);
+                    else ctx.lineTo(weaveX, y);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+            } else if (currentPosKey === '5G') {
+                // Pipe Circular Joint 360°
+                const cx = w / 2;
+                const cy = h / 2;
+                const r = Math.min(w, h) * 0.35;
+
+                ctx.save();
+                ctx.strokeStyle = '#1d2738';
+                ctx.lineWidth = 38;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#080c14';
+                ctx.lineWidth = 10;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.strokeStyle = 'rgba(255, 157, 0, 0.5)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function drawWeldSeam() {
+            const now = Date.now();
+
+            seamPoints.forEach(pt => {
+                const age = (now - pt.timestamp) / 1000;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+
+                if (pt.quality === "burn_through") {
+                    ctx.fillStyle = "#ef4444";
+                } else if (pt.quality === "lack_of_fusion") {
+                    ctx.fillStyle = "#475569";
+                } else if (pt.quality === "off_track") {
+                    ctx.fillStyle = "#a855f7";
+                } else {
+                    if (age < 1.2) {
+                        ctx.fillStyle = "#ffffff";
+                    } else if (age < 3.0) {
+                        ctx.fillStyle = "#fbbf24";
+                    } else if (age < 5.5) {
+                        ctx.fillStyle = "#ea580c";
+                    } else {
+                        ctx.fillStyle = "#64748b";
+                    }
+                }
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.restore();
+            });
+        }
+
+        function drawSparks() {
+            sparkParticles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, 2.5, 2.5);
+
+                if (p.life <= 0) {
+                    sparkParticles.splice(idx, 1);
+                }
+            });
+        }
+
+        function drawTorchAndArc() {
+            // Arc Glow Radiation
+            const grad = ctx.createRadialGradient(torchX, torchY, 2, torchX, torchY, 48);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.2, '#00d2ff');
+            grad.addColorStop(0.55, 'rgba(255, 157, 0, 0.4)');
+            grad.addColorStop(1, 'transparent');
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(torchX, torchY, 48, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Welding Electrode Nozzle Tip
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(torchX, torchY);
+            ctx.lineTo(torchX + 30, torchY - 45);
+            ctx.stroke();
+        }
+
+        function openCertificateModal() {
+            if (!isQualified) {
+                showNotification("Sertifikat belum dapat dibuka! Capai kelulusan terlebih dahulu.", "error");
+                return;
+            }
+
+            const welderName = document.getElementById('input-welder-name').value.trim() || "Budi Santoso";
+            const companyName = document.getElementById('input-company-name').value.trim() || "PT Teknik Las Nusantara";
+
+            // Render Certificate onto Canvas
+            if (document.fonts) {
+                document.fonts.ready.then(() => {
+                    renderCertificateCanvas(welderName, companyName, currentPosKey, currentEvaluationScore);
+                });
+            } else {
+                renderCertificateCanvas(welderName, companyName, currentPosKey, currentEvaluationScore);
+            }
+
+            document.getElementById('cert-modal').classList.remove('hidden');
+        }
+
+        function closeCertModal() {
+            document.getElementById('cert-modal').classList.add('hidden');
+        }
+
+        function showNotification(msg, type = "info") {
+            const toast = document.createElement('div');
+            const bgColor = type === "success" ? "bg-emerald-500 text-slate-950 border-emerald-300" :
+                            type === "error" ? "bg-red-500 text-white border-red-300" : "bg-amber-500 text-slate-950 border-amber-300";
+            
+            toast.className = `fixed bottom-5 right-5 ${bgColor} px-5 py-3.5 rounded-xl font-bold text-xs shadow-2xl z-50 transition-all border border-opacity-40 max-w-md leading-relaxed flex items-center gap-2`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} text-base"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4500);
+        }
+
+        // Official High-Res Canvas Certificate Renderer
+        function renderCertificateCanvas(name, company, posKey, score) {
+            const cw = certCanvas.width;
+            const ch = certCanvas.height;
+
+            // 1. Background Parchment & Radial Gradient
+            certCtx.fillStyle = '#fefcf8';
+            certCtx.fillRect(0, 0, cw, ch);
+
+            const bgGrad = certCtx.createRadialGradient(cw/2, ch/2, 120, cw/2, ch/2, 650);
+            bgGrad.addColorStop(0, '#ffffff');
+            bgGrad.addColorStop(1, '#f6edd9');
+            certCtx.fillStyle = bgGrad;
+            certCtx.fillRect(0, 0, cw, ch);
+
+            // 2. Dual Gold & Navy Official Frame
+            certCtx.strokeStyle = '#0f172a';
+            certCtx.lineWidth = 16;
+            certCtx.strokeRect(30, 30, cw - 60, ch - 60);
+
+            certCtx.strokeStyle = '#c5a059';
+            certCtx.lineWidth = 4;
+            certCtx.strokeRect(46, 46, cw - 92, ch - 92);
+
+            // Corner Flourishes
+            const drawCorner = (x, y, rot) => {
+                certCtx.save();
+                certCtx.translate(x, y);
+                certCtx.rotate(rot);
+                certCtx.strokeStyle = '#c5a059';
+                certCtx.lineWidth = 3.5;
+                certCtx.beginPath();
+                certCtx.moveTo(0, 0);
+                certCtx.lineTo(40, 0);
+                certCtx.moveTo(0, 0);
+                certCtx.lineTo(0, 40);
+                certCtx.stroke();
+                certCtx.restore();
+            };
+
+            drawCorner(60, 60, 0);
+            drawCorner(cw - 60, 60, Math.PI / 2);
+            drawCorner(cw - 60, ch - 60, Math.PI);
+            drawCorner(60, ch - 60, -Math.PI / 2);
+
+            // 3. Certificate Title & Header
+            certCtx.textAlign = 'center';
+
+            certCtx.fillStyle = '#0f172a';
+            certCtx.font = '800 38px "Cinzel", serif, Times';
+            certCtx.fillText("SERTIFIKAT KUALIFIKASI WELDER", cw / 2, 132);
+
+            certCtx.fillStyle = '#b45309';
+            certCtx.font = '700 15px "Cinzel", serif, Georgia';
+            certCtx.fillText("QUALIFIED WELDER CERTIFICATE • STANDAR ASME SEC IX / AWS D1.1", cw / 2, 168);
+
+            // Divider Line
+            certCtx.strokeStyle = '#c5a059';
+            certCtx.lineWidth = 2;
+            certCtx.beginPath();
+            certCtx.moveTo(cw / 2 - 180, 192);
+            certCtx.lineTo(cw / 2 + 180, 192);
+            certCtx.stroke();
+
+            // 4. Recipient Details
+            certCtx.fillStyle = '#475569';
+            certCtx.font = '400 16px "Inter", sans-serif';
+            certCtx.fillText("Dengan ini menerangkan bahwa welder profesional berikut:", cw / 2, 240);
+
+            // Welder Name
+            certCtx.fillStyle = '#0f172a';
+            certCtx.font = '800 42px "Cinzel", serif, Georgia';
+            certCtx.fillText(name.toUpperCase(), cw / 2, 300);
+
+            const nameWidth = certCtx.measureText(name.toUpperCase()).width;
+            certCtx.strokeStyle = '#c5a059';
+            certCtx.lineWidth = 2.5;
+            certCtx.beginPath();
+            certCtx.moveTo(cw / 2 - (nameWidth / 2) - 20, 316);
+            certCtx.lineTo(cw / 2 + (nameWidth / 2) + 20, 316);
+            certCtx.stroke();
+
+            // Company Name
+            certCtx.fillStyle = '#475569';
+            certCtx.font = '600 20px "Inter", sans-serif';
+            certCtx.fillText(company, cw / 2, 352);
+
+            // Statement
+            certCtx.fillStyle = '#475569';
+            certCtx.font = '400 16px "Inter", sans-serif';
+            certCtx.fillText("Telah dinyatakan LULUS & QUALIFIED dalam Uji Kualifikasi Simulasi Posisi:", cw / 2, 410);
+
+            // Position Title Box
+            const posConfig = POSITIONS_CONFIG[posKey];
+            certCtx.fillStyle = '#0f172a';
+            certCtx.fillRect(cw / 2 - 250, 435, 500, 50);
+
+            certCtx.fillStyle = '#ffffff';
+            certCtx.font = '700 21px "Cinzel", serif';
+            certCtx.fillText(posConfig.name.toUpperCase(), cw / 2, 468);
+
+            // Evaluation Metrics Summary
+            certCtx.fillStyle = '#1e293b';
+            certCtx.font = '600 15px "Inter", sans-serif';
+            certCtx.fillText(`Nilai Evaluasi NDT & Visual: ${score} / 100    •    Penetrasi: 100%    •    Status: QUALIFIED`, cw / 2, 528);
+
+            // 5. Official Gold Stamp Emblem (Left)
+            const sealX = 200;
+            const sealY = 665;
+
+            certCtx.save();
+            certCtx.strokeStyle = '#b45309';
+            certCtx.lineWidth = 4;
+            certCtx.beginPath();
+            certCtx.arc(sealX, sealY, 52, 0, Math.PI * 2);
+            certCtx.stroke();
+
+            certCtx.fillStyle = '#b45309';
+            certCtx.font = '800 11px "Cinzel", serif';
+            certCtx.fillText("OFFICIAL QUALIFIED", sealX, sealY - 14);
+            certCtx.fillText("★ ★ ★", sealX, sealY);
+            certCtx.fillText("ASME / AWS", sealX, sealY + 14);
+            certCtx.restore();
+
+            // 6. Signatures & Date (Right)
+            const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            
+            certCtx.fillStyle = '#475569';
+            certCtx.font = '400 14px "Inter", sans-serif';
+            certCtx.fillText(`Diterbitkan: ${today}`, cw - 250, 610);
+
+            // Stylized Digital Signature Text
+            certCtx.fillStyle = '#0f172a';
+            certCtx.font = '600 38px "Pinyon Script", cursive, Georgia';
+            certCtx.fillText("Dr. Eng. Ir. Hendra Las, M.T.", cw - 250, 656);
+
+            certCtx.strokeStyle = '#94a3b8';
+            certCtx.lineWidth = 1;
+            certCtx.beginPath();
+            certCtx.moveTo(cw - 370, 675);
+            certCtx.lineTo(cw - 130, 675);
+            certCtx.stroke();
+
+            certCtx.fillStyle = '#64748b';
+            certCtx.font = '600 13px "Inter", sans-serif';
+            certCtx.fillText("Ketua Komite Kualifikasi Las NDT", cw - 250, 695);
+
+            // 7. QR Code Verification Graphic (Center Bottom)
+            drawQRCodeGraphic(certCtx, cw / 2 - 25, 620, 50);
+
+            // Cert Verification License ID
+            const certID = `WELD-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+            certCtx.fillStyle = '#94a3b8';
+            certCtx.font = '500 12px "JetBrains Mono", monospace';
+            certCtx.fillText(`License Serial ID: ${certID}`, cw / 2, 775);
+
+            // Render PNG Image Data
+            const imgDataURL = certCanvas.toDataURL('image/png');
+            document.getElementById('cert-preview-img').src = imgDataURL;
+        }
+
+        // Simple QR Code Graphic Generator on Canvas
+        function drawQRCodeGraphic(ctx, x, y, size) {
+            ctx.save();
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x, y, size, size);
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x, y, size, size);
+
+            ctx.fillStyle = '#0f172a';
+            const grid = [
+                [1,1,1,1,0,1,1,1,1],
+                [1,0,0,1,0,1,0,0,1],
+                [1,0,0,1,1,1,0,0,1],
+                [1,1,1,1,0,1,1,1,1],
+                [0,0,1,0,1,0,1,0,0],
+                [1,0,1,1,0,1,0,1,1],
+                [1,1,0,1,1,0,1,0,1],
+                [1,0,0,0,1,1,1,0,1],
+                [1,1,1,1,0,1,0,1,1]
+            ];
+            const cellSize = size / 9;
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (grid[r][c]) {
+                        ctx.fillRect(x + c * cellSize, y + r * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+            ctx.restore();
+        }
+
+        // Export Actions
+        function downloadCertificatePNG() {
+            const name = document.getElementById('input-welder-name').value.trim() || "Welder";
+            const filename = `Sertifikat_Kualifikasi_Las_${currentPosKey}_${name.replace(/\s+/g, '_')}.png`;
+
+            const imageURI = certCanvas.toDataURL('image/png', 1.0);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = imageURI;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function printCertificate() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
